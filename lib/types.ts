@@ -80,7 +80,7 @@ export type HiddenResult = {
   matches: (traits: Traits) => boolean;
 };
 
-/** 1위-2위 궁합 격차에 따른 접전 안내 구간. (SPEC 6장) */
+/** 1위-2위 궁합 격차에 따른 접전 안내 구간. (SPEC 10장) */
 export type MarginBand = "tie" | "close" | "normal" | "clear";
 
 export type TeamScore = {

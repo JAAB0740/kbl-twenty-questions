@@ -67,7 +67,7 @@ function roundedRect(
   ctx.fill();
 }
 
-/** SPEC 11장: 세로형 1080x1920 공유 이미지 생성. */
+/** SPEC 13장: 세로형 1080x1920 공유 이미지 생성. */
 export async function renderShareImage({
   team,
   percent,

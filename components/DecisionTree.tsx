@@ -6,7 +6,7 @@ type Props = {
   team: Team;
 };
 
-/** SPEC 10장: 위에서 아래로 이어지는 세로형 선택 경로. */
+/** SPEC 12장: 위에서 아래로 이어지는 세로형 선택 경로. */
 export default function DecisionTree({ answers, team }: Props) {
   const nodes = QUESTIONS.map((question, index) => {
     const option = question.options[answers[index] ?? 0];

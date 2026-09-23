@@ -147,23 +147,27 @@ export default function TestPage() {
 
   const goBack = useCallback(() => {
     clearTimers();
-    setPicked(null);
     setPhase("idle");
     setReaction(null);
     setReactionLeaving(false);
 
     if (stage === "region") {
+      setPicked(
+        locationWeight === true ? 0 : locationWeight === false ? 1 : null,
+      );
       setStage("importance");
       return;
     }
     if (stage === "importance") {
+      setPicked(answers[TOTAL_QUESTIONS - 1] ?? null);
       setStage("questions");
       setStep(TOTAL_QUESTIONS - 1);
       return;
     }
     if (step === 0) return;
+    setPicked(answers[step - 1] ?? null);
     setStep(step - 1);
-  }, [clearTimers, stage, step]);
+  }, [answers, clearTimers, locationWeight, stage, step]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {

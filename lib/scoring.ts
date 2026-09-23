@@ -26,7 +26,7 @@ export const INITIAL_TRAITS: Traits = {
 
 export const TRAIT_KEYS = Object.keys(INITIAL_TRAITS) as TraitKey[];
 
-/** 결과 페이지 막대그래프 라벨. (SPEC 8장) */
+/** 결과 페이지 막대그래프 라벨. (SPEC 9장) */
 export const TRAIT_BARS: { label: string; get: (t: Traits) => number }[] = [
   { label: "승부욕", get: (t) => t.winning },
   { label: "스타 사랑", get: (t) => t.star },
@@ -45,7 +45,7 @@ const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(max, value));
 
 /**
- * 히든 결과. (SPEC 7장)
+ * 히든 결과. (SPEC 8장)
  * raw user trait 값으로만 판정한다. scoring 방식(cosine)과는 완전히 별개다.
  * id는 내부 식별자일 뿐 화면에 노출되지 않는다. 배열 순서 = findHidden의 우선순위
  * (여러 조건이 동시에 맞아도 먼저 나오는 것 하나만 보여준다).
@@ -151,7 +151,7 @@ const COSINE_EPSILON = 1e-6;
 /**
  * 50을 중심으로 옮긴 두 벡터의 cosine similarity. 범위 -1~1.
  * 둘 중 하나라도 magnitude가 1e-6보다 작으면(=거의 중립) 0으로 방어 처리한다.
- * (SPEC 16장)
+ * (SPEC 18장)
  */
 export function centeredCosine(user: Traits, team: Traits): number {
   let dot = 0;
@@ -175,20 +175,20 @@ export function centeredCosine(user: Traits, team: Traits): number {
 
 /**
  * 직관 거리가 중요하다고 답했고 생활권이 일치하는 경우에만 주는 아주 약한 보너스.
- * cosine 스케일(-1~1)에서 +0.03이며, 최종 adjustedCosine은 -1~1로 clamp한다. (SPEC 4장)
+ * cosine 스케일(-1~1)에서 +0.03이며, 최종 adjustedCosine은 -1~1로 clamp한다. (SPEC 18장)
  */
 const LOCATION_BONUS = 0.03;
 
 /**
  * ranking 점수(cosine)와 화면 표시용 "농구 궁합 %"는 분리한다.
- * 표시값은 calibration을 거치며, 이 함수의 결과는 랭킹에 쓰이지 않는다. (SPEC 5장)
+ * 표시값은 calibration을 거치며, 이 함수의 결과는 랭킹에 쓰이지 않는다. (SPEC 18장)
  */
 export function displayCompatibility(cosine: number): number {
   const calibrated = 50 + 50 * Math.sign(cosine) * Math.pow(Math.abs(cosine), 1.3);
   return Math.round(clamp(calibrated, 0, 100));
 }
 
-/** 1위-2위 adjustedCosine 격차에 따른 접전 안내 구간. (SPEC 6장) */
+/** 1위-2위 adjustedCosine 격차에 따른 접전 안내 구간. (SPEC 10장) */
 export function marginBandOf(gap: number): MarginBand {
   if (gap < 0.01) return "tie";
   if (gap < 0.03) return "close";
