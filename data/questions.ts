@@ -55,18 +55,18 @@ export const QUESTIONS: Question[] = [
   {
     id: "q3",
     no: 3,
-    prompt: ["어떤 스코어가 더 재미있는가?"],
+    prompt: ["어떤 경기가 더 재미있어 보이나요?"],
     options: [
       {
-        label: "105 : 103",
+        label: "105 : 103처럼 점수가 많이 나는 화끈한 경기",
         effects: { offense: 15, chaos: 5 },
         treeLabel: "점수가 많이 나야 재밌다",
         treeTag: "YES",
       },
       {
-        label: "68 : 65",
+        label: "68 : 65처럼 수비 싸움이 치열한 팽팽한 경기",
         effects: { defense: 15, chaos: -5 },
-        reaction: "점수가 안 나도 괜찮으시군요. 귀한 분입니다.",
+        reaction: "점수가 많이 안 나도 괜찮으시군요. 귀한 분입니다.",
         treeLabel: "점수가 많이 나야 재밌다",
         treeTag: "NO",
       },
@@ -75,16 +75,16 @@ export const QUESTIONS: Question[] = [
   {
     id: "q4",
     no: 4,
-    prompt: ["팀에 한 명만 있다면?"],
+    prompt: ["어떤 팀에 더 끌리나요?"],
     options: [
       {
-        label: "리그 최고의 슈퍼스타",
+        label: "리그 최고의 슈퍼스타가 이끄는 팀",
         effects: { star: 15 },
         treeLabel: "슈퍼스타가 있어야 한다",
         treeTag: "YES",
       },
       {
-        label: "이름값보다 손발 맞는 5명",
+        label: "스타 한 명보다 5명이 손발 맞춰 움직이는 팀",
         effects: { star: -15, defense: 10 },
         treeLabel: "슈퍼스타가 있어야 한다",
         treeTag: "NO",

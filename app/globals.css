@@ -22,6 +22,78 @@ body {
   background-attachment: fixed;
 }
 
+/* 히든 결과 카드 전용 애니메이션. 반복 없이 한 번만 재생된다. */
+@keyframes hidden-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes hidden-glow-flash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 201, 60, 0);
+    border-color: rgba(255, 201, 60, 0.35);
+  }
+  35% {
+    box-shadow: 0 0 42px -6px rgba(255, 201, 60, 0.55);
+    border-color: rgba(255, 201, 60, 0.75);
+  }
+  100% {
+    box-shadow: 0 0 28px -12px rgba(255, 201, 60, 0.22);
+    border-color: rgba(255, 201, 60, 0.35);
+  }
+}
+
+@keyframes hidden-sparkle-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) rotate(-8deg);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.05) rotate(6deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.7) rotate(12deg);
+  }
+}
+
+/* 질문 화면 reaction 말풍선 전용. 등장은 살짝 튀어나오듯, 퇴장은 짧은 fade만. */
+@keyframes reaction-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes reaction-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes reaction-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 /* 한글은 어절 단위로 줄바꿈해야 읽기 편하다. */
 h1,
 h2,
@@ -42,6 +114,11 @@ span {
 
   .card {
     @apply rounded-2xl border border-court-line bg-court-card/80 backdrop-blur;
+  }
+
+  /* 결과 페이지 1위 HERO 카드 전용. 다른 카드보다 눈에 띄게 만드는 용도로만 쓴다. */
+  .hero-card {
+    @apply border-2 border-court-accent/40 shadow-[0_0_60px_-16px_rgba(255,92,43,0.4)];
   }
 
   .choice {
@@ -71,8 +148,72 @@ span {
       px-6 py-3.5 text-center text-[15px] font-semibold text-court-ink transition hover:border-court-muted;
   }
 
+  /* 결과 페이지의 "재심 청구" tertiary action 전용. .btn-primary 자체는 건드리지 않는다. */
+  .btn-outline-accent {
+    @apply inline-flex w-full items-center justify-center rounded-full border-2 border-court-accent/70 bg-transparent
+      px-6 py-4 text-center text-[17px] font-bold text-court-accent transition hover:bg-court-accent/10 active:scale-[0.99];
+  }
+
   .label-chip {
     @apply inline-flex items-center gap-1.5 rounded-full border border-court-line bg-court-card/70 px-3 py-1
       text-[12px] font-semibold tracking-wide text-court-muted;
+  }
+
+  /* 랜딩 페이지 전용. 다른 화면의 .btn-primary/.card 자체는 건드리지 않는다. */
+  .cta-glow {
+    @apply hover:shadow-[0_0_36px_rgba(255,92,43,0.35)];
+  }
+
+  .teaser-card {
+    @apply border-dashed border-court-line/80;
+  }
+
+  /*
+   * 히든 결과 카드 전용. HERO보다 약한 glow, 골드 테두리 + 짙은 버건디 그라디언트로
+   * 일반 카드/HERO와 확실히 구분한다. 등장 시 한 번만 페이드인 + glow 플래시.
+   */
+  .hidden-card {
+    @apply relative border-2;
+    background-image: linear-gradient(
+      160deg,
+      rgba(122, 42, 24, 0.45),
+      rgba(21, 24, 31, 0.92) 65%
+    );
+    border-color: rgba(255, 201, 60, 0.35);
+    animation:
+      hidden-card-in 550ms ease-out both,
+      hidden-glow-flash 900ms ease-out both;
+  }
+
+  .hidden-sparkle {
+    @apply pointer-events-none absolute text-[14px] leading-none;
+    animation: hidden-sparkle-pop 650ms ease-out both;
+  }
+
+  /* 질문 화면 reaction 말풍선 전용. */
+  .reaction-in {
+    animation: reaction-in 220ms ease-out both;
+  }
+
+  .reaction-out {
+    animation: reaction-out 160ms ease-out both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hidden-card {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    box-shadow: none;
+    border-color: rgba(255, 201, 60, 0.35);
+  }
+
+  .hidden-sparkle {
+    display: none;
+  }
+
+  .reaction-in {
+    animation: reaction-fade-in 220ms ease-out both;
   }
 }

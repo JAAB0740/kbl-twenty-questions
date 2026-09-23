@@ -47,47 +47,69 @@ const clamp = (value: number, min: number, max: number) =>
 /**
  * 히든 결과. (SPEC 7장)
  * raw user trait 값으로만 판정한다. scoring 방식(cosine)과는 완전히 별개다.
+ * id는 내부 식별자일 뿐 화면에 노출되지 않는다. 배열 순서 = findHidden의 우선순위
+ * (여러 조건이 동시에 맞아도 먼저 나오는 것 하나만 보여준다).
  */
 export const HIDDEN_RESULTS: HiddenResult[] = [
   {
-    id: "winner-only",
-    title: "승리만 바라보는 자",
+    // 한국어 별칭: "똥믈리에". 고생을 견디는 사람이 아니라
+    // 검증되지 않은 선택을 굳이 직접 해보는 사람이라는 캐릭터라서 patience 조건은 넣지 않는다.
+    id: "dong-sommelier",
+    title: "똥믈리에",
     lines: [
-      "잠깐.",
-      "당신에게 필요한 건 응원팀이 아닐지도 모릅니다.",
-      "당신은 그냥 이기는 팀을 좋아합니다.",
-      "플레이오프 대진표가 나온 뒤 다시 방문해주세요.",
+      "다들 아니라고 했습니다.",
+      "데이터도 아니라고 했습니다.",
+      "그런데 직접 봐야 직성이 풀립니다.",
+      "",
+      "그리고 가끔 진짜 맛집을 발견합니다.",
     ],
-    matches: (t) => t.winning >= 90 && t.patience <= 35 && t.storyline <= 50,
+    matches: (t) =>
+      t.underdog >= 80 && t.tradition <= 40 && t.youth >= 65 && t.chaos >= 65,
+  },
+  {
+    id: "romantic",
+    title: "영광의 시대 빌런",
+    lines: [
+      "성적표보다 기억에 남는 시즌이 중요합니다.",
+      "",
+      "그리고 누가 묻지도 않았는데",
+      "'그 시즌은 진짜 달랐는데…'",
+      "로 이야기를 시작합니다.",
+    ],
+    matches: (t) => t.storyline >= 90 && t.underdog >= 75,
   },
   {
     id: "pain-collector",
-    title: "고통 수집가",
+    title: "고통 수집가 (보살)",
     lines: [
-      "강팀이 싫은 건 아닙니다.",
-      "쉽게 행복해지는 방법을 거부할 뿐입니다.",
+      "연패해도 봅니다.",
+      "리빌딩이어도 봅니다.",
+      "그리고 다음 경기도 봅니다.",
+      "",
+      "이쯤 되면 응원이 아니라 수행입니다.",
     ],
     matches: (t) => t.patience >= 75 && t.underdog >= 85,
   },
   {
-    id: "strong-heart",
-    title: "심장 튼튼한 사람",
+    id: "winner-only",
+    title: "강팀충",
     lines: [
-      "20점 차 리드도",
-      "당신에게는 안심할 이유가 되지 않습니다.",
-      "그리고 이상하게 그게 좋습니다.",
+      "스포츠는 결국 이겨야 재밌습니다.",
+      "감동적인 패배요?",
+      "일단 이기고 감동하겠습니다.",
     ],
-    matches: (t) => t.chaos >= 90,
+    matches: (t) => t.winning >= 90 && t.patience <= 35 && t.storyline <= 50,
   },
   {
-    id: "romantic",
-    title: "농구 낭만주의자",
+    id: "strong-heart",
+    title: "도파민 중독자",
     lines: [
-      "우승 트로피보다",
-      "그때 그 시즌 기억나?",
-      "라는 말을 더 좋아합니다.",
+      "20점 차 리드? 아직 모릅니다.",
+      "4쿼터 역전? 오히려 좋습니다.",
+      "",
+      "편안한 경기는 하이라이트가 부족합니다.",
     ],
-    matches: (t) => t.storyline >= 90 && t.underdog >= 75,
+    matches: (t) => t.chaos >= 90,
   },
 ];
 

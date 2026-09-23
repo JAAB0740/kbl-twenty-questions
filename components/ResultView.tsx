@@ -10,22 +10,47 @@ import { buildResult, isCompleteAnswerSet } from "@/lib/scoring";
 import { downloadBlob, renderShareImage } from "@/lib/shareImage";
 import type { MarginBand } from "@/lib/types";
 
-/** 1위-2위 격차 구간별 접전 안내 문구. (SPEC 6장) */
-const MARGIN_MESSAGES: Record<MarginBand, { title: string; body: string } | null> = {
+/**
+ * 1위-2위 격차 구간별 접전 안내. HERO 카드 하단 status strip에 쓰인다. (SPEC 10장)
+ * tie/close는 실제 2위 팀 이름을 넣어 보여준다.
+ */
+const MARGIN_BADGES: Record<
+  MarginBand,
+  { emoji: string; text: (secondTeamName: string) => string } | null
+> = {
   tie: {
-    title: "거의 동률!",
-    body: "두 팀 사이에서 고민할 타입이에요.",
+    emoji: "🔥",
+    text: (name) => `거의 동률! ${name}도 꽤 잘 맞아요.`,
   },
   close: {
-    title: "아슬아슬한 접전!",
-    body: "두 번째 팀도 꽤 잘 맞아요.",
+    emoji: "👀",
+    text: () => "아슬아슬한 접전! 두 번째 팀도 꽤 잘 맞아요.",
   },
   normal: null,
   clear: {
-    title: "취향이 꽤 선명하네요.",
-    body: "1순위 팀이 확실하게 앞섰습니다.",
+    emoji: "🎯",
+    text: () => "취향이 꽤 선명하네요. 1순위 팀이 확실하게 앞섰습니다.",
   },
 };
+
+/**
+ * 히든 카드에서만 쓰는 UI 전용 아이콘/부제. hidden condition·본문 문구는 건드리지 않는다.
+ * lib/scoring.ts의 HIDDEN_RESULTS id와 1:1로만 맞춘다.
+ */
+const HIDDEN_UI_META: Record<string, { icon: string; subtitle: string }> = {
+  "winner-only": { icon: "👑", subtitle: "지는 건 서사로 안 쳐주는 타입" },
+  "pain-collector": { icon: "🧘", subtitle: "쉽게 행복해지는 방법을 거부한 사람" },
+  "dong-sommelier": { icon: "💩", subtitle: "남들이 말려도 직접 먹어봐야 아는 타입" },
+  "strong-heart": { icon: "⚡", subtitle: "평온한 경기를 견디지 못하는 타입" },
+  romantic: { icon: "🌹", subtitle: "그때 그 시즌이 진짜였지를 참지 못하는 타입" },
+};
+
+/** 등장 시 카드 주변에 아주 짧게 반짝이는 3개의 sparkle. 장식용, 1초 내 종료. */
+const HIDDEN_SPARKLES = [
+  { style: { top: "-8px", right: "18px" }, delay: 460 },
+  { style: { top: "10px", left: "-6px" }, delay: 540 },
+  { style: { bottom: "-6px", right: "-4px" }, delay: 620 },
+];
 
 export default function ResultView() {
   const searchParams = useSearchParams();
@@ -62,7 +87,7 @@ export default function ResultView() {
   const { answers } = decoded;
   const [first, second, third] = result.ranking;
   const team = first.team;
-  const marginMessage = MARGIN_MESSAGES[result.marginBand];
+  const marginBadge = MARGIN_BADGES[result.marginBand];
 
   const share = async () => {
     const url = typeof window === "undefined" ? "" : window.location.href;
@@ -103,38 +128,40 @@ export default function ResultView() {
 
   return (
     <main className="app-shell gap-6">
-      {result.hidden && (
-        <section className="card animate-pop-in border-court-accent/50 bg-court-accent/10 p-5">
-          <span className="label-chip border-court-accent/40 text-court-accent2">
-            히든 결과
-          </span>
-          <h2 className="mt-3 text-[20px] font-extrabold">{result.hidden.title}</h2>
-          <div className="mt-2 space-y-1 text-[15px] leading-relaxed text-court-ink/90">
-            {result.hidden.lines.map((line) => (
-              <p key={line}>{line}</p>
-            ))}
-          </div>
-        </section>
-      )}
-
+      {/* 1위 HERO — 페이지에서 가장 강한 시각 요소 */}
       <section
-        className="card animate-fade-up overflow-hidden"
+        className="card hero-card animate-fade-up overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(160deg, ${team.color}2E, transparent 60%)`,
+          backgroundImage: `linear-gradient(160deg, ${team.color}33, transparent 65%)`,
         }}
       >
-        <div className="p-6">
-          <p className="text-[15px] text-court-muted">당신의 운명의 KBL 팀은</p>
+        <div className="p-6 lg:p-8">
+          <p className="text-[13px] font-bold uppercase tracking-[0.1em] text-court-muted">
+            당신의 1순위 KBL 팀
+          </p>
           <h1
-            className="mt-2 text-[30px] font-extrabold leading-tight tracking-tight"
+            className="mt-2 text-[32px] font-extrabold leading-tight tracking-tight lg:text-[38px]"
             style={{ color: team.color }}
           >
             {team.name}
           </h1>
-          <p className="mt-3 text-[22px] font-extrabold text-court-accent2">
-            농구 궁합 {first.percent}%
+
+          <p className="mt-6 text-[12px] font-bold uppercase tracking-[0.15em] text-court-muted">
+            농구 궁합
           </p>
-          <p className="mt-3 text-[16px] leading-relaxed text-court-ink/90">
+          <p className="mt-0.5 flex items-baseline gap-1">
+            <span className="text-[64px] font-extrabold leading-none tracking-tight text-court-accent2 lg:text-[76px]">
+              {first.percent}
+            </span>
+            <span className="text-[28px] font-extrabold text-court-accent2 lg:text-[32px]">
+              %
+            </span>
+          </p>
+
+          <p className="mt-5 text-[12px] font-bold uppercase tracking-[0.15em] text-court-muted">
+            당신의 팬 유형
+          </p>
+          <p className="mt-1.5 text-[18px] font-extrabold leading-snug text-court-ink">
             {team.fanType}
           </p>
           {first.locationBonus && (
@@ -142,15 +169,55 @@ export default function ResultView() {
               생활권이 가까워 약간의 보너스가 반영됐습니다.
             </p>
           )}
+
+          {marginBadge && (
+            <div className="mt-6 flex items-center gap-2.5 rounded-xl border border-court-line/70 bg-court-bg/50 px-4 py-3">
+              <span className="text-[16px] leading-none">{marginBadge.emoji}</span>
+              <p className="text-[13px] leading-relaxed text-court-ink/90">
+                {marginBadge.text(second.team.shortName)}
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
-      {marginMessage && (
-        <section className="card animate-fade-up border-court-line/70 p-5">
-          <p className="text-[15px] font-bold text-court-ink">{marginMessage.title}</p>
-          <p className="mt-1 text-[14px] leading-relaxed text-court-muted">
-            {marginMessage.body}
+      {/* 히든 결과 — 메인 결과가 아니라 보너스 칭호/업적 해금처럼 보이게 한다.
+          1위 HERO가 먼저 그려진 뒤 살짝 늦게(400ms) 등장한다. */}
+      {result.hidden && (
+        <section
+          className="card hidden-card relative p-4"
+          style={{ animationDelay: "400ms" }}
+        >
+          {HIDDEN_SPARKLES.map((sparkle, index) => (
+            <span
+              key={index}
+              aria-hidden="true"
+              className="hidden-sparkle"
+              style={{ ...sparkle.style, animationDelay: `${sparkle.delay}ms` }}
+            >
+              ✨
+            </span>
+          ))}
+
+          <span className="label-chip border-court-accent2/40 text-court-accent2">
+            🔓 숨겨진 팬 유형 발견
+          </span>
+
+          <h2 className="mt-3 flex items-center gap-2 text-[20px] font-extrabold leading-snug">
+            <span aria-hidden="true">
+              {HIDDEN_UI_META[result.hidden.id]?.icon ?? "🔓"}
+            </span>
+            <span>{result.hidden.title}</span>
+          </h2>
+          <p className="mt-0.5 text-[12px] font-bold text-court-accent2">
+            {HIDDEN_UI_META[result.hidden.id]?.subtitle}
           </p>
+
+          <div className="mt-3 space-y-1 text-[14px] leading-relaxed text-court-ink/90">
+            {result.hidden.lines.map((line, index) => (
+              <p key={index}>{line || " "}</p>
+            ))}
+          </div>
         </section>
       )}
 
@@ -191,33 +258,32 @@ export default function ResultView() {
         </ul>
       </section>
 
+      {/* 2·3위 — 1위는 이미 HERO에서 보여줬으므로 여기서는 반복하지 않는다 */}
       <section className="card animate-fade-up p-5">
         <h2 className="text-[13px] font-bold tracking-wide text-court-accent2">
-          TOP 3 궁합
+          다른 후보도 궁금하다면
         </h2>
-        <div className="mt-3 space-y-3">
-          {[first, second, third].map((entry, index) => (
+        <div className="mt-3 space-y-2">
+          {[second, third].map((entry, index) => (
             <div
               key={entry.team.id}
-              className={[
-                "flex items-center justify-between gap-3 rounded-xl border px-4 py-3",
-                index === 0
-                  ? "border-court-accent/50 bg-court-accent/10"
-                  : "border-court-line/70",
-              ].join(" ")}
+              className="flex items-center gap-3 rounded-lg border border-court-line/60 px-3.5 py-2.5"
             >
-              <div>
-                <p className="text-[12px] font-bold text-court-muted">
-                  궁합 {index + 1}위
-                </p>
-                <p className="text-[16px] font-bold" style={{ color: entry.team.color }}>
+              <span className="w-[34px] shrink-0 text-[11px] font-bold text-court-muted">
+                {index + 2}위
+              </span>
+              <div className="min-w-0 flex-1">
+                <p
+                  className="truncate text-[14px] font-bold"
+                  style={{ color: entry.team.color }}
+                >
                   {entry.team.name}
                 </p>
-                <p className="mt-0.5 text-[13px] leading-relaxed text-court-muted">
+                <p className="line-clamp-2 text-[12px] leading-snug text-court-muted">
                   {entry.team.fanType}
                 </p>
               </div>
-              <span className="shrink-0 text-[18px] font-extrabold tabular-nums text-court-ink">
+              <span className="shrink-0 text-[15px] font-extrabold tabular-nums text-court-ink/80">
                 {entry.percent}%
               </span>
             </div>
@@ -229,7 +295,7 @@ export default function ResultView() {
         <button
           type="button"
           onClick={() => setShowTree((prev) => !prev)}
-          className="btn-ghost"
+          className="btn-ghost py-3"
         >
           {showTree ? "선택 경로 접기" : "내가 여기까지 온 과정 보기"}
         </button>
@@ -240,18 +306,19 @@ export default function ResultView() {
           </div>
         )}
 
-        <button type="button" onClick={share} className="btn-ghost">
-          결과 자랑하러 가기
-        </button>
         <button
           type="button"
           onClick={saveImage}
           disabled={busy}
-          className="btn-ghost disabled:opacity-50"
+          className="btn-ghost py-3 disabled:opacity-50"
         >
           {busy ? "이미지 만드는 중..." : "공유용 이미지 저장하기"}
         </button>
-        <Link href="/test" className="btn-primary">
+
+        <button type="button" onClick={share} className="btn-primary">
+          결과 자랑하러 가기
+        </button>
+        <Link href="/test" className="btn-outline-accent">
           결과에 불복하고 재심 청구하기
         </Link>
 
